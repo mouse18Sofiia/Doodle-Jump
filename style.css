@@ -1,18 +1,8 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+body {
+    text-align: center;
 }
 
-#canvas1{
-    border: 5px solid black;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    max-width: 100%;
-    max-height: 100%;
-}
-#bg, #rabbit, #moll, #shell, #green_platform, #blue_platform, #brown_platform #white_platform{
-    display: none;
+#board {
+    /* background-color: green; */
+    background-image: url("./images/background.png");
 }
