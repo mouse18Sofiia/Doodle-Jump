@@ -18,6 +18,11 @@ let velocityY = 0; //doodler jump speed
 let initialVelocityY = -8; //starting velocity Y
 let gravity = 0.4;
 
+//platforms
+let platformArray = [];
+let platformWidth = 60;
+let platformHeight = 18;
+let platformImg;
 
 let doodler = {
     img : null,
@@ -27,14 +32,12 @@ let doodler = {
     height : doodlerHeight
 }
 
-
 window.onload = function() {
     board = document.getElementById("board");
     board.height = boardHeight;
     board.width = boardWidth;
     context = board.getContext("2d"); //used for drawing on the board
 
-    
     //draw doodler
     //context.fillStyle = "green";
     // context.fillRect(doodler.x, doodler.y, doodler.width, doodler.height);
@@ -50,12 +53,17 @@ window.onload = function() {
     doodlerLeftImg = new Image();
     doodlerLeftImg.src = "./images/rabbit-left.png";
 
+    platformImg = new Image();
+    platformImg.src = "./images/gr-platform.png";
+
+    placePlatforms();
     requestAnimationFrame(update);
     document.addEventListener("keydown", moveDoodler);
 }
 
 function update() {
     requestAnimationFrame(update);
+    context.clearRect(0, 0, board.width, board.height);
 
     //doodler
     doodler.x += velocityX;
@@ -66,6 +74,12 @@ function update() {
         doodler.x = boardWidth;
     }
     context.drawImage(doodler.img, doodler.x, doodler.y, doodler.width, doodler.height);
+
+    //platforms
+    for (let i = 0; i < platformArray.length; i++) {
+        let platform = platformArray[i];
+        context.drawImage(platform.img, platform.x, platform.y, platform.width, platform.height);
+    }
 }
 
 function moveDoodler(e){
@@ -77,4 +91,18 @@ function moveDoodler(e){
         velocityX = -4;
         doodler.img = doodlerLeftImg;
     }
+}
+
+function placePlatforms() {
+    platformArray = [];
+
+    //starting platforms
+    let  platform = {
+        img : platformImg,
+        x : boardWidth/2,
+        y : boardHeight - 50
+    }
+
+    platformArray.push(platform);
+    
 }
