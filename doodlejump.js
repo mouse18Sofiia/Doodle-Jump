@@ -34,6 +34,7 @@ let platformImg;
 
 let score = 0;
 let maxScore = 0;
+let gameOver = false;
 
 window.onload = function() {
     board = document.getElementById("board");
@@ -42,7 +43,7 @@ window.onload = function() {
     context = board.getContext("2d"); //used for drawing on the board
 
     //draw doodler
-    //context.fillStyle = "green";
+    // context.fillStyle = "green";
     // context.fillRect(doodler.x, doodler.y, doodler.width, doodler.height);
 
     //load images
@@ -58,7 +59,7 @@ window.onload = function() {
 
     platformImg = new Image();
     platformImg.src = "./images/gr-platform.png";
-    
+
     velocityY = initialVelocityY;
     placePlatforms();
     requestAnimationFrame(update);
@@ -67,6 +68,9 @@ window.onload = function() {
 
 function update() {
     requestAnimationFrame(update);
+    if (gameOver) {
+        return;
+    }
     context.clearRect(0, 0, board.width, board.height);
 
     //doodler
@@ -80,21 +84,24 @@ function update() {
 
     velocityY += gravity;
     doodler.y += velocityY;
+    if (doodler.y > board.height) {
+        gameOver = true;
+    }
     context.drawImage(doodler.img, doodler.x, doodler.y, doodler.width, doodler.height);
 
     //platforms
     for (let i = 0; i < platformArray.length; i++) {
         let platform = platformArray[i];
-        if (delectCollision(doodler, platform)) {
-            velocityY = initialVelocityY; //slide platform down
+        if (velocityY < 0 && doodler.y < boardHeight*3/4) {
+            platform.y -= initialVelocityY; //slide platform down
         }
         if (detectCollision(doodler, platform) && velocityY >= 0) {
             velocityY = initialVelocityY; //jump
         }
         context.drawImage(platform.img, platform.x, platform.y, platform.width, platform.height);
     }
-    
-     // clear platforms and add new platform
+
+    // clear platforms and add new platform
     while (platformArray.length > 0 && platformArray[0].y >= boardHeight) {
         platformArray.shift(); //removes first element from the array
         newPlatform(); //replace with new platform on top
@@ -105,10 +112,14 @@ function update() {
     context.fillStyle = "black";
     context.font = "16px sans-serif";
     context.fillText(score, 5, 20);
+
+    if (gameOver) {
+        context.fillText("Game Over: Press 'Space' to Restart", boardWidth/7, boardHeight*7/8);
+    }
 }
 
-function moveDoodler(e){
-    if (e.code == "ArrowRight" || e.code == "KeyD"){ // move right
+function moveDoodler(e) {
+    if (e.code == "ArrowRight" || e.code == "KeyD") { //move right
         velocityX = 4;
         doodler.img = doodlerRightImg;
     }
@@ -116,13 +127,30 @@ function moveDoodler(e){
         velocityX = -4;
         doodler.img = doodlerLeftImg;
     }
+    else if (e.code == "Space" && gameOver) {
+        //reset
+        doodler = {
+            img : doodlerRightImg,
+            x : doodlerX,
+            y : doodlerY,
+            width : doodlerWidth,
+            height : doodlerHeight
+        }
+
+        velocityX = 0;
+        velocityY = initialVelocityY;
+        score = 0;
+        maxScore = 0;
+        gameOver = false;
+        placePlatforms();
+    }
 }
 
 function placePlatforms() {
     platformArray = [];
 
-    //starting platforms
-    let  platform = {
+//starting platforms
+    let platform = {
         img : platformImg,
         x : boardWidth/2,
         y : boardHeight - 50,
@@ -150,7 +178,7 @@ function placePlatforms() {
             width : platformWidth,
             height : platformHeight
         }
-
+    
         platformArray.push(platform);
     }
 }
@@ -168,8 +196,8 @@ function newPlatform() {
     platformArray.push(platform);
 }
 
-function delectCollision(a, b) {
-    return a.x < b.x + b.width &&  //a's top left corner doesn't reach b's top right corner
+function detectCollision(a, b) {
+    return a.x < b.x + b.width &&   //a's top left corner doesn't reach b's top right corner
            a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
            a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
            a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
