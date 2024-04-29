@@ -55,7 +55,8 @@ window.onload = function() {
 
     platformImg = new Image();
     platformImg.src = "./images/gr-platform.png";
-
+    
+    velocityY = initialVelocityY;
     placePlatforms();
     requestAnimationFrame(update);
     document.addEventListener("keydown", moveDoodler);
@@ -73,6 +74,9 @@ function update() {
     else if (doodler.x + doodler.width < 0) {
         doodler.x = boardWidth;
     }
+
+    velocityY += gravity;
+    doodler.y += velocityY;
     context.drawImage(doodler.img, doodler.x, doodler.y, doodler.width, doodler.height);
 
     //platforms
@@ -100,9 +104,27 @@ function placePlatforms() {
     let  platform = {
         img : platformImg,
         x : boardWidth/2,
-        y : boardHeight - 50
+        y : boardHeight - 50,
+        width : platformWidth,
+        height : platformHeight
     }
 
     platformArray.push(platform);
-    
+
+    platform = {
+        img : platformImg,
+        x : boardWidth/2,
+        y : boardHeight - 150,
+        width : platformWidth,
+        height : platformHeight
+    }
+
+    platformArray.push(platform);
+}
+
+function delectCollision(a, b) {
+    return a.x < b.x + b.width &&  //a's top left corner doesn't reach b's top right corner
+           a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
+           a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
+           a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
 }
