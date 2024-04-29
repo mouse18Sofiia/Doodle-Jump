@@ -101,8 +101,8 @@ function update() {
         if (detectCollision(doodler, platform) && velocityY >= 0) {
             if (platform.img.src.includes("br-platform.png")) { // Перевіряємо, чи платформа коричнева
                 velocityY = initialVelocityY; //jump
-                platformArray.splice(i, 1); // Видаляємо коричневу платформу
-                break; // Виходимо з циклу, оскільки вже видалили платформу
+                platformArray.splice(i, 1); // remove the brown platform
+                break; 
             }
             else {
                 velocityY = initialVelocityY; //jump
@@ -182,13 +182,13 @@ function moveDoodler(e) {
         placePlatforms();
     }
 
-    // Перевіряємо, чи doodler може врятуватися, приземлившись на зелену платформу
+    // check whether the doodler can save himself by landing on the green platform
     if (velocityY >= 0 && !gameOver) {
         let onGreenPlatform = platformArray.some(platform => {
             return detectCollision(doodler, platform) && platform.img.src.includes("gr-platform.png");
         });
         if (onGreenPlatform) {
-            velocityY = initialVelocityY; // Змінюємо напрямок руху doodler, щоб він приземлився на зелену платформу
+            velocityY = initialVelocityY; // Change the doodler's direction so that it lands on the green platform
         }
     }
 }
@@ -204,7 +204,7 @@ function shuffle(array) {
 function placePlatforms() {
     platformArray = [];
 
-    // Початкові платформи
+    // Initial platforms
     let platform = {
         img : platformImg,
         x : boardWidth/2,
@@ -214,12 +214,12 @@ function placePlatforms() {
     };
     platformArray.push(platform);
 
-    // Зелені та коричневі платформи
-    let maxPlatformGap = Math.abs(initialVelocityY); // Максимальний проміжок між платформами
+    // Green and brown platforms
+    let maxPlatformGap = Math.abs(initialVelocityY); // The maximum distance between platforms
 
-    for (let i = 0; i < 20; i++) { // Збільшуємо кількість платформ для частішого трапляння зелених
+    for (let i = 0; i < 20; i++) { // We are increasing the number of platforms for greens to occur more often
         let randomX = Math.floor(Math.random() * boardWidth*3/4);
-        let platformType = Math.random() >= 0.2 ? "gr-platform.png" : "br-platform.png"; // Зелені платформи трапляються з більшою ймовірністю
+        let platformType = Math.random() >= 0.2 ? "gr-platform.png" : "br-platform.png"; 
         let platform = {
             img : new Image(),
             x : randomX,
@@ -228,7 +228,7 @@ function placePlatforms() {
             height : platformHeight
         };
         
-        // Задаємо випадковий зміщення платформи
+        // set a random displacement of the platform
         let randomOffset = Math.floor(Math.random() * maxPlatformGap * 2) - maxPlatformGap;
         platform.y -= randomOffset;
 
