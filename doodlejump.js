@@ -59,8 +59,11 @@ window.onload = function() {
 
     platformImg = new Image();
     platformImg.src = "./images/gr-platform.png";
+    platformImg.src = "./images/br-platform.png";
 
     velocityY = initialVelocityY;
+
+    brokenPlatform();
     placePlatforms();
     requestAnimationFrame(update);
     document.addEventListener("keydown", moveDoodler);
@@ -96,7 +99,14 @@ function update() {
             platform.y -= initialVelocityY; //slide platform down
         }
         if (detectCollision(doodler, platform) && velocityY >= 0) {
-            velocityY = initialVelocityY; //jump
+            if (platform.img.src.includes("br-platform.png")) { // Перевіряємо, чи платформа коричнева
+                velocityY = initialVelocityY; //jump
+                platformArray.splice(i, 1); // Видаляємо коричневу платформу
+                break; // Виходимо з циклу, оскільки вже видалили платформу
+            }
+            else {
+                velocityY = initialVelocityY; //jump
+            }
         }
         context.drawImage(platform.img, platform.x, platform.y, platform.width, platform.height);
     }
@@ -117,6 +127,33 @@ function update() {
         context.fillText("Game Over: Press 'Space' to Restart", boardWidth/7, boardHeight*7/8);
     }
 }
+
+function brokenPlatform (){
+    let randomX = Math.floor(Math.random() * (boardWidth - 0 + 1)) +0;
+    let platform = {
+        img : platformImg,
+        x : randomX,
+        y : -platformHeight,
+        width : platformWidth,
+        height : platformHeight
+    }
+
+    platformArray.push(platform);
+}
+
+function newPlatform() {
+    let randomX = Math.floor(Math.random() * boardWidth*3/4); //(0-1) * boardWidth*3/4
+    let platform = {
+        img : platformImg,
+        x : randomX,
+        y : -platformHeight,
+        width : platformWidth,
+        height : platformHeight
+    }
+
+    platformArray.push(platform);
+}
+
 
 function moveDoodler(e) {
     if (e.code == "ArrowRight" || e.code == "KeyD") { //move right
@@ -144,10 +181,61 @@ function moveDoodler(e) {
         gameOver = false;
         placePlatforms();
     }
+
+    // Перевіряємо, чи doodler може врятуватися, приземлившись на зелену платформу
+    if (velocityY >= 0 && !gameOver) {
+        let onGreenPlatform = platformArray.some(platform => {
+            return detectCollision(doodler, platform) && platform.img.src.includes("gr-platform.png");
+        });
+        if (onGreenPlatform) {
+            velocityY = initialVelocityY; // Змінюємо напрямок руху doodler, щоб він приземлився на зелену платформу
+        }
+    }
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
 function placePlatforms() {
     platformArray = [];
+
+    // Початкові платформи
+    let platform = {
+        img : platformImg,
+        x : boardWidth/2,
+        y : boardHeight - 50,
+        width : platformWidth,
+        height : platformHeight
+    };
+    platformArray.push(platform);
+
+    // Зелені та коричневі платформи
+    let maxPlatformGap = Math.abs(initialVelocityY); // Максимальний проміжок між платформами
+
+    for (let i = 0; i < 20; i++) { // Збільшуємо кількість платформ для частішого трапляння зелених
+        let randomX = Math.floor(Math.random() * boardWidth*3/4);
+        let platformType = Math.random() >= 0.2 ? "gr-platform.png" : "br-platform.png"; // Зелені платформи трапляються з більшою ймовірністю
+        let platform = {
+            img : new Image(),
+            x : randomX,
+            y : boardHeight - 75*i - 150,
+            width : platformWidth,
+            height : platformHeight
+        };
+        
+        // Задаємо випадковий зміщення платформи
+        let randomOffset = Math.floor(Math.random() * maxPlatformGap * 2) - maxPlatformGap;
+        platform.y -= randomOffset;
+
+        platform.img.src = "./images/" + platformType;
+        platformArray.push(platform);
+    }
+}
 
 //starting platforms
     let platform = {
@@ -181,6 +269,20 @@ function placePlatforms() {
     
         platformArray.push(platform);
     }
+
+
+function brokenPlatform (){
+    let randomX = Math.floor(Math.random() * (5 - 0 + 1)) +0;
+    let platform = {
+        img : platformImg,
+        x : randomX,
+        y : -platformHeight,
+        width : platformWidth,
+        height : platformHeight
+    }
+
+    platformArray.push(platform);
+
 }
 
 function newPlatform() {
