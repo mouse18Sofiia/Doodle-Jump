@@ -89,8 +89,8 @@ function update() {
     doodler.y += velocityY;
 
     // Check if doodler reaches the top of the board
-    if (doodler.y <= 0) {
-        doodler.y = 0; // Stop the doodler from going further up
+    if (doodler.y <= -1) {
+        doodler.y = -1; // Stop the doodler from going further up
         velocityY = 0; // Stop the doodler's vertical velocity
     }
 
@@ -102,6 +102,7 @@ function update() {
     //platforms
     for (let i = 0; i < platformArray.length; i++) {
         let platform = platformArray[i];
+        platform.y += 1;
         if (velocityY < 0 && doodler.y < boardHeight*3/4) {
             platform.y -= initialVelocityY; //slide platform down
         }
@@ -260,6 +261,8 @@ function placePlatforms() {
 }
 
 //starting platforms
+for (let i = 0; i < 6; i++) {
+    let randomX = Math.floor(Math.random() * boardWidth * 3 / 4);
     let platform = {
         img : platformImg,
         x : boardWidth/2,
@@ -267,6 +270,7 @@ function placePlatforms() {
         width : platformWidth,
         height : platformHeight
     }
+}
 
     platformArray.push(platform);
 
