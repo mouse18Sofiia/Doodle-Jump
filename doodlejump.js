@@ -1,7 +1,7 @@
 //board
 let board;
-let boardWidth = 360;
-let boardHeight = 576;
+let boardWidth = 460;
+let boardHeight = 676;
 let context;
 
 //doodler
@@ -87,6 +87,13 @@ function update() {
 
     velocityY += gravity;
     doodler.y += velocityY;
+
+    // Check if doodler reaches the top of the board
+    if (doodler.y <= 0) {
+        doodler.y = 0; // Stop the doodler from going further up
+        velocityY = 0; // Stop the doodler's vertical velocity
+    }
+
     if (doodler.y > board.height) {
         gameOver = true;
     }
@@ -98,8 +105,12 @@ function update() {
         if (velocityY < 0 && doodler.y < boardHeight*3/4) {
             platform.y -= initialVelocityY; //slide platform down
         }
+        if (platform.y > boardHeight) {
+            platformArray.splice(i, 1); // remove platform if it's below the board
+            continue; // continue to next iteration to avoid index shift
+        }
         if (detectCollision(doodler, platform) && velocityY >= 0) {
-            if (platform.img.src.includes("br-platform.png")) { // Перевіряємо, чи платформа коричнева
+            if (platform.img.src.includes("br-platform.png")) {
                 velocityY = initialVelocityY; //jump
                 platformArray.splice(i, 1); // remove the brown platform
                 break; 
@@ -156,6 +167,10 @@ function newPlatform() {
 
 
 function moveDoodler(e) {
+    if (gameOver && e.code !== "Space") { 
+        return;
+    }
+
     if (e.code == "ArrowRight" || e.code == "KeyD") { //move right
         velocityX = 4;
         doodler.img = doodlerRightImg;
@@ -167,19 +182,26 @@ function moveDoodler(e) {
     else if (e.code == "Space" && gameOver) {
         //reset
         doodler = {
-            img : doodlerRightImg,
+            img : doodlerRightImg, 
             x : doodlerX,
             y : doodlerY,
             width : doodlerWidth,
             height : doodlerHeight
         }
-
+    
         velocityX = 0;
         velocityY = initialVelocityY;
         score = 0;
         maxScore = 0;
         gameOver = false;
         placePlatforms();
+    }
+
+    // Check if moving left or right will keep the doodler within the board boundaries
+    if ((e.code == "ArrowRight" || e.code == "KeyD") && doodler.x + doodler.width + velocityX <= boardWidth) {
+        doodler.x += velocityX;
+    } else if ((e.code == "ArrowLeft" || e.code == "KeyA") && doodler.x + velocityX >= 0) {
+        doodler.x += velocityX;
     }
 
     // check whether the doodler can save himself by landing on the green platform
@@ -217,9 +239,9 @@ function placePlatforms() {
     // Green and brown platforms
     let maxPlatformGap = Math.abs(initialVelocityY); // The maximum distance between platforms
 
-    for (let i = 0; i < 20; i++) { // We are increasing the number of platforms for greens to occur more often
+    for (let i = 0; i < 100; i++) { // We are increasing the number of platforms for greens to occur more often
         let randomX = Math.floor(Math.random() * boardWidth*3/4);
-        let platformType = Math.random() >= 0.2 ? "gr-platform.png" : "br-platform.png"; 
+        let platformType = Math.random() >= 0.1 ? "gr-platform.png" : "br-platform.png"; 
         let platform = {
             img : new Image(),
             x : randomX,
